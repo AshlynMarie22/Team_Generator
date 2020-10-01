@@ -14,99 +14,117 @@ const mainArray = [];
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 promptInfo();
-function promptInfo(userInputOne){
-    inquirer.prompt([
-       { name: "employeeName",
+function promptInfo() {
+  inquirer
+    .prompt([
+      {
+        name: "employeeRole",
+        type: "list",
+        messgae: "What is the employee's role?",
+        choices: ["Manager", "Engineer", "Intern"],
+      },
+      {
+        name: "employeeName",
         type: "input",
-        message: "What is the employee's name?"
-       },
-       {
-           name: "employeeRole",
-           type: "list",
-           messgae: "What is the employee's role?",
-           choices: ["Manager", "Engineer", "Intern"]
-       },
-       {
-           name: "employeeEmail",
-           type: "input",
-           message: "What is the employee's email?"
-       },
-       {
-           name: "employeeId",
-           type: "input",
-           message: "What is the employee's id?"
-       }
-
-    ]).then(function(res){
-        specificPrompt(res);
-    }).catch(function(err){
-        if(err) throw err;
-        console.log("Only basic employee info logged")
+        message: "What is the employee's name?",
+      },
+      {
+        name: "employeeEmail",
+        type: "input",
+        message: "What is the employee's email?",
+      },
+      {
+        name: "employeeId",
+        type: "input",
+        message: "What is the employee's id?",
+      },
+    ])
+    .then(function (res) {
+      specificPrompt(res);
     })
+    .catch(function (err) {
+      if (err) throw err;
+      console.log("Error occured");
+    });
 }
-function specificPrompt(userInputTwo){
-    if(userInputTwo.employeeRole === "Intern"){
-        inquirer.prompt([
-            {
-                name: "school",
-                type: "input",
-                message: "What school did the employee attend?"
-            }
-        ]).then(function(specificResponse){
-            const intern = new Intern(userInputTwo.employeeName, userInputTwo.employeeEmail, userInputTwo.employeeId, specificResponse.school)
-            mainArray.push(intern);
-            endPrompt();
-        }).catch(function(err){
-            if(err) throw err
-        })
-    }else if(userInputTwo.employeeRole === "Engineer"){
-        inquirer.prompt([
-            {
-                name: "github",
-                type: "input",
-                message: "What is the employees's GitHub username?"
-            }
-        ]).then(function(specificResponse){
-            const engineer = new Engineer(userInputTwo.employeeName, userInputTwo.employeeEmail, userInputTwo.employeeId, specificResponse.github)
-            mainArray.push(engineer);
-            endPrompt();
-        }).catch(function(err){
-            if(err) throw err
-        })
-    }else if(userInputTwo.employeeRole === "Manager"){
-        inquirer.prompt([
-            {
-                name: "officeNumber",
-                type: "input",
-                message: "What is the employees's office number?"
-            }
-        ]).then(function(specificResponse){
-            const manager = new Manager(userInputTwo.employeeName, userInputTwo.employeeEmail, userInputTwo.employeeId, specificResponse.officeNumber)
-            mainArray.push(manager);
-            endPrompt();
-        }).catch(function(err){
-            if(err) throw err
-        })
-    }
-    }
-    function endPrompt(){
-        inquirer.prompt([
-            {
-                name:"end",
-                type: "confirm",
-                message:"Are you done adding employees?"
-            }
-        ]).then(function(res){
-            if(res.end){
-                const newEmployee = render(mainArray);
-                fs.writeFile(outputPath, newEmployee, function(err){
-                    if(err) throw err;
-                })
-            }else{
-                promptInfo();
-            }
-        })
-    }
+function specificPrompt(userInputTwo) {
+  const name = userInputTwo.employeeName;
+  const id = userInputTwo.employeeId;
+  const email = userInputTwo.employeeEmail;
+  const role = userInputTwo.employeeRole;
+  if ( role === "Intern") {
+    inquirer
+      .prompt([
+        {
+          name: "school",
+          type: "input",
+          message: "What school did the employee attend?",
+        },
+      ])
+      .then(function (roleResponse) {
+        const intern = new Intern(name, id, email, roleResponse.school);
+        mainArray.push(intern);
+        endPrompt();
+      })
+      .catch(function (err) {
+        if (err) throw err;
+      });
+  } else if (role === "Engineer") {
+    inquirer
+      .prompt([
+        {
+          name: "github",
+          type: "input",
+          message: "What is the employees's GitHub username?",
+        },
+      ])
+      .then(function (roleResponse) {
+        const engineer = new Engineer(name, id, email, roleResponse.github);
+        mainArray.push(engineer);
+        endPrompt();
+      })
+      .catch(function (err) {
+        if (err) throw err;
+      });
+  } else if (role === "Manager") {
+    inquirer
+      .prompt([
+        {
+          name: "officeNumber",
+          type: "input",
+          message: "What is the employees's office number?",
+        },
+      ])
+      .then(function (roleResponse) {
+        const manager = new Manager(name, id, email, roleResponse.officeNumber);
+        mainArray.push(manager);
+        endPrompt();
+      })
+      .catch(function (err) {
+        if (err) throw err;
+      });
+  }
+}
+function endPrompt() {
+  inquirer
+    .prompt([
+      {
+        name: "end",
+        type: "confirm",
+        message: "Have you added all of your employees?",
+      },
+    ])
+    .then(function (res) {
+      if (res.end) {
+        const newEmployee = render(mainArray);
+        fs.writeFile(outputPath, newEmployee, function (err) {
+          if (err) throw err;
+        });
+      } else {
+        promptInfo();
+      }
+    });
+}
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
